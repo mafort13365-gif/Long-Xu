@@ -1,1 +1,111 @@
-
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Long Xu - AI助手</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#ededed;height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
+.header{background:#1aad19;padding:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.back-btn{color:#fff;font-size:20px;cursor:pointer;padding:4px}
+.header-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1aad19,#0d8f0d);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:bold;flex-shrink:0}
+.header-info h3{color:#fff;font-size:16px;font-weight:600}
+.header-info p{color:rgba(255,255,255,0.8);font-size:12px}
+.header-right{color:#fff;font-size:20px}
+.online-dot{width:8px;height:8px;background:#4dff4d;border-radius:50%;display:inline-block;margin-right:4px;animation:blink 2s infinite}
+.chat-area{flex:1;overflow-y:auto;padding:70px 12px 80px;background:#ededed}
+.date-divider{text-align:center;margin:12px 0;font-size:12px;color:#999}
+.date-divider span{background:#d4d4d4;padding:2px 10px;border-radius:10px}
+.msg{display:flex;align-items:flex-start;gap:10px;margin:8px 0}
+.msg.user{flex-direction:row-reverse}
+.msg-avatar{width:40px;height:40px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold}
+.bot-avatar{background:linear-gradient(135deg,#1aad19,#0d8f0d);color:#fff}
+.user-avatar{background:linear-gradient(135deg,#576b95,#3a4f7a);color:#fff;font-size:14px}
+.msg-content{max-width:70%}
+.msg-name{font-size:12px;color:#999;margin-bottom:4px}
+.msg.user .msg-name{text-align:right}
+.bubble{padding:10px 14px;border-radius:4px;font-size:15px;line-height:1.6;word-break:break-word;position:relative}
+.bot-bubble{background:#fff;color:#333;border-radius:0 8px 8px 8px}
+.bot-bubble::before{content:'';position:absolute;left:-8px;top:12px;border:6px solid transparent;border-right-color:#fff}
+.user-bubble{background:#1aad19;color:#fff;border-radius:8px 0 8px 8px}
+.user-bubble::after{content:'';position:absolute;right:-8px;top:12px;border:6px solid transparent;border-left-color:#1aad19}
+.msg-time{font-size:11px;color:#999;margin-top:4px}
+.msg.user .msg-time{text-align:right}
+.typing{display:flex;align-items:center;gap:4px;padding:12px 16px}
+.typing span{width:8px;height:8px;background:#999;border-radius:50%;animation:typing 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+.input-area{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#f5f5f5;border-top:1px solid #ddd;padding:8px 12px;display:flex;align-items:center;gap:8px}
+.input-box{flex:1;background:#fff;border:1px solid #ddd;border-radius:4px;padding:8px 12px;font-size:15px;font-family:inherit;resize:none;max-height:80px;outline:none;line-height:1.4}
+.input-box:focus{border-color:#1aad19}
+.send-btn{background:#1aad19;color:#fff;border:none;border-radius:4px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.send-btn:active{background:#0d8f0d}
+.send-btn:disabled{background:#ccc}
+.welcome-card{background:#fff;border-radius:8px;padding:16px;margin:8px 0;text-align:center;border-left:4px solid #1aad19}
+.welcome-card h4{color:#1aad19;font-size:15px;margin-bottom:6px}
+.welcome-card p{color:#666;font-size:13px;line-height:1.6}
+.quick-replies{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.qr-btn{background:#f0f9f0;border:1px solid #1aad19;color:#1aad19;border-radius:16px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.qr-btn:active{background:#1aad19;color:#fff}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="back-btn">‹</div>
+    <div class="header-avatar">龙</div>
+    <div class="header-info">
+      <h3>Long Xu · AI助手</h3>
+      <p><span class="online-dot"></span>在线</p>
+    </div>
+  </div>
+  <div class="header-right">⋯</div>
+</div>
+<div class="chat-area" id="chatArea">
+  <div class="date-divider"><span id="currentDate"></span></div>
+  <div class="msg" id="welcomeMsg" style="display:none">
+    <div class="msg-avatar bot-avatar">龙</div>
+    <div class="msg-content">
+      <div class="msg-name">Long Xu</div>
+      <div class="bubble bot-bubble">
+        <div class="welcome-card">
+          <h4>🤖 Long Xu AI助手</h4>
+          <p>您好！我是Long Xu，您的智能AI助手。<br>很高兴为您服务！<br><br>Hello! I am Long Xu, your AI assistant.<br>How can I help you today?</p>
+        </div>
+        <div class="quick-replies">
+          <button class="qr-btn" onclick="sendQuick('你们提供什么服务？')">提供什么服务？</button>
+          <button class="qr-btn" onclick="sendQuick('价格是多少？')">价格是多少？</button>
+          <button class="qr-btn" onclick="sendQuick('如何合作？')">如何合作？</button>
+          <button class="qr-btn" onclick="sendQuick('你好')">你好！</button>
+        </div>
+      </div>
+      <div class="msg-time" id="welcomeTime"></div>
+    </div>
+  </div>
+</div>
+<div class="input-area">
+  <textarea class="input-box" id="inputBox" placeholder="发送消息..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+  <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+</div>
+<script>
+const responses={greetings:['你好','您好','hello','hi','嗨','哈喽','早上好','晚上好'],services:['服务','提供','能做什么','做什么','业务','产品'],price:['价格','多少钱','费用','收费','报价','便宜','贵'],cooperation:['合作','联系','怎么','如何','联络','找你们'],bot:['机器人','bot','机器','自动','ai','人工智能','智能'],website:['网站','官网','主页','web','建站'],guarantee:['保证','保障','质量','售后','担保'],time:['多久','时间','几天','周期','什么时候'],thanks:['谢谢','感谢','thank','太好了','好的','明白']};
+const botReplies={greetings:['您好！我是Long Xu AI助手 🤖\n很高兴认识您！请问有什么我可以帮助您的吗？','您好！欢迎咨询 😊\n我是Long Xu，专业的AI智能助手。请问您需要什么帮助？'],services:['我们提供以下专业服务：\n\n🤖 Telegram/VK 智能机器人开发\n🌐 网站设计与开发\n📣 社交媒体推广运营\n💡 IT技术咨询\n🔒 VPN服务解决方案\n📊 数据分析与报告\n\n所有服务均可根据您的需求定制！'],price:['我们的价格方案非常灵活：\n\n💰 基础套餐：从5,000卢布起\n💼 商业套餐：从15,000卢布起\n🛡️ 维护订阅：从2,000卢布/月\n\n✅ 质量保证1年\n✅ 支持分期付款\n✅ 根据项目定制报价\n\n请联系我们获取详细报价！'],cooperation:['与我们合作非常简单：\n\n1️⃣ 联系我们讨论您的需求\n2️⃣ 我们制定详细方案\n3️⃣ 签署合同并开始开发\n4️⃣ 交付项目并提供1年保修\n\n📧 邮箱：Vektorizi@yandex.ru\n\n我们期待与您合作！🤝'],bot:['我们专业开发各类智能机器人：\n\n✈️ Telegram机器人\n💬 VK机器人\n🤖 AI智能对话机器人\n🔗 API接口集成\n\n机器人可实现：\n• 自动回复客户\n• 接受在线支付\n• 推广活动管理\n• 数据统计分析\n\n想了解更多？'],website:['我们开发高质量网站：\n\n🌐 企业展示网站\n🛒 电商平台\n📱 移动端优化\n🔍 SEO搜索优化\n\n✅ 无需VPN即可在俄罗斯访问\n✅ 快速加载\n✅ 现代设计\n\n从5,000卢布起！'],guarantee:['我们对质量有严格保证：\n\n🛡️ 1年免费保修\n📄 正式合同与文件\n✅ 完整的项目文档\n🔧 保修期后可订阅维护服务\n\n您的满意是我们的首要目标！'],time:['项目开发周期：\n\n⚡ 简单机器人：3-7天\n🔨 复杂项目：7-21天\n🌐 网站开发：7-14天\n\n我们始终按时交付，保证项目质量！'],thanks:['不客气！很高兴能帮到您 😊\n如果还有其他问题，随时告诉我！','感谢您的信任！🙏\n有任何问题欢迎随时咨询！'],default:['感谢您的提问！\n\n我可以帮您了解：\n• 我们的服务项目\n• 价格与套餐\n• 合作流程\n• 技术解决方案\n\n请问您最想了解哪方面？','这是个很好的问题！\n\n我们是专业的IT公司，提供机器人开发、网站建设、社交媒体推广等服务。\n\n请问您对哪项服务感兴趣？','您好！感谢咨询 😊\n\n我们专注于为客户提供高质量的IT解决方案。\n\n📧 如需详细咨询：Vektorizi@yandex.ru']};
+function getReply(text){const t=text.toLowerCase();for(const[key,keywords]of Object.entries(responses)){if(keywords.some(k=>t.includes(k))){const arr=botReplies[key];return arr[Math.floor(Math.random()*arr.length)]}}const def=botReplies.default;return def[Math.floor(Math.random()*def.length)]}
+function getTime(){return new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}
+function addMessage(text,isUser){const area=document.getElementById('chatArea');const div=document.createElement('div');div.className='msg'+(isUser?' user':'');const avatar=document.createElement('div');avatar.className='msg-avatar '+(isUser?'user-avatar':'bot-avatar');avatar.textContent=isUser?'您':'龙';const content=document.createElement('div');content.className='msg-content';if(!isUser){const name=document.createElement('div');name.className='msg-name';name.textContent='Long Xu';content.appendChild(name)}const bubble=document.createElement('div');bubble.className='bubble '+(isUser?'user-bubble':'bot-bubble');bubble.style.whiteSpace='pre-wrap';bubble.textContent=text;content.appendChild(bubble);const time=document.createElement('div');time.className='msg-time';time.textContent=getTime();content.appendChild(time);div.appendChild(avatar);div.appendChild(content);area.appendChild(div);area.scrollTop=area.scrollHeight}
+function showTyping(){const area=document.getElementById('chatArea');const div=document.createElement('div');div.className='msg';div.id='typingIndicator';div.innerHTML=`<div class="msg-avatar bot-avatar">龙</div><div class="msg-content"><div class="msg-name">Long Xu</div><div class="bubble bot-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;area.appendChild(div);area.scrollTop=area.scrollHeight}
+function hideTyping(){const el=document.getElementById('typingIndicator');if(el)el.remove()}
+function sendMessage(){const input=document.getElementById('inputBox');const text=input.value.trim();if(!text)return;input.value='';input.style.height='auto';document.getElementById('sendBtn').disabled=true;addMessage(text,true);showTyping();const delay=800+Math.random()*1200;setTimeout(()=>{hideTyping();addMessage(getReply(text),false);document.getElementById('sendBtn').disabled=false},delay)}
+function sendQuick(text){document.getElementById('inputBox').value=text;sendMessage()}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px'}
+window.onload=function(){const now=new Date();document.getElementById('currentDate').textContent=now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});document.getElementById('welcomeTime').textContent=getTime();setTimeout(()=>{document.getElementById('welcomeMsg').style.display='flex';document.getElementById('chatArea').scrollTop=999999},500)};
+</script>
+</body>
+  </html>
